@@ -19,11 +19,10 @@ services:
       - MYSQL_DATA_DIRECTORY=/var/lib/mysql
     volumes:
       - /etc/localtime:/etc/localtime
-      - ./database/conf/mysql.cnf:/etc/mysql/mysql.conf
-      - ./database/logs:/var/log/mysql
       - ./database/conf:/etc/mysql
-      - ./database/data:/var/lib/mysql
       - ./database/scripts:/scripts
+      - /var/log/sesp/mysql:/var/log/mysql
+      - /var/lib/sesp/mysql:/var/lib/mysql
   refapp-tomcat:
     image: hub.csaude.org.mz/sesp/tomcat:9.0.97
     container_name: refapp-tomcat
@@ -55,4 +54,3 @@ services:
 networks:
   network:
     driver: bridge
-
