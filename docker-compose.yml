@@ -18,11 +18,13 @@ services:
     # -- EOF REMOVE AFTER DATABASE CREATION
       - MYSQL_DATA_DIRECTORY=/var/lib/mysql
     volumes:
+      # Bind Volumes ------------------------------------------
       - /etc/localtime:/etc/localtime
       - ./database/conf:/etc/mysql
       - ./database/scripts:/scripts
-      - /var/log/sesp/mysql:/var/log/mysql
-      - /var/lib/sesp/mysql:/var/lib/mysql
+      # Docker managed volumes ---------------------------------------------------------------------
+      - refappDbData:/var/lib/mysql
+      - refappDbLogs:/var/log/mysql
   refapp-tomcat:
     image: hub.csaude.org.mz/sesp/tomcat:9.0.97
     container_name: refapp-tomcat
@@ -39,18 +41,31 @@ services:
       DISA_API_USERNAME:
       DISA_API_PASSWORD:
     volumes:
+      # Bind Volumes ------------------------------------------------------------------------------
       - /etc/localtime:/etc/localtime
       - ./tomcat/conf/openmrs-runtime.properties:/usr/local/tomcat/openmrs-runtime.properties
       - ./tomcat/conf/setenv.sh:/usr/local/tomcat/bin/setenv.sh
-      - ./tomcat/logs:/usr/local/tomcat/logs
       - ./tomcat/data/webapps:/usr/local/tomcat/webapps
       - ./tomcat/data/OpenMRS:/usr/local/tomcat/.OpenMRS
+      # Docker managed volumes ---------------------------------------------------------------------
+      - refappTCLogs:/usr/local/tomcat/logs
     healthcheck:
       test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
       interval: 2s
       timeout: 30s 
       retries: 15
-
+# Network Definition ------------------------------------------------------------------------------
 networks:
   network:
     driver: bridge
+# Volume definition -------------------------------------------------------------------------------
+volumes:
+  refappDbData:
+    labels:
+      - data.refapp-db.description: "openMRS Database Volume"
+  refappDbLogs:
+    labels:
+      - logs.refapp-db.description: "openMRS Database Logs"
+  refappTCLogs:
+      - logs.refapp-tomcat.description: "openMRS Tomcat Logs"
+
