@@ -9,7 +9,7 @@ tomcat/data/OpenMRS/owa/
 tomcat/data/OpenMRS/REPORT_RESULTS
 tomcat/data/OpenMRS/person_images
 tomcat/data/OpenMRS/openmrs.log
-tomcat/data/logs/
+tomcat/logs/
 
 # Ignore the provided dump file
 build/mysql/openmrs.sql
