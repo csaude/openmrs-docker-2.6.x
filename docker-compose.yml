@@ -16,19 +16,19 @@ services:
       - MYSQL_USER=sesp
       - MYSQL_PASSWORD=sesp
     # -- EOF REMOVE AFTER DATABASE CREATION
-      - MYSQL_DATA_DIRECTORY=/var/lib/mysql
+      - MYSQL_DATA_DIRECTORY=/var/lib/mysql/data
+      - MYSQL_LOG_DIRECTORY=/var/lib/mysql/log
     volumes:
       # Bind Volumes ------------------------------------------
       - /etc/localtime:/etc/localtime
       - ./database/conf:/etc/mysql
       - ./database/scripts:/scripts
       # Docker managed volumes ---------------------------------------------------------------------
-      - refappDbData:/var/lib/mysql
-      - refappDbLogs:/var/log/mysql
+      - refappDb:/var/lib/mysql
   refapp-tomcat:
     image: hub.csaude.org.mz/sesp/tomcat:9.0.97
     container_name: refapp-tomcat
-    stop_grace_period: 30m 
+    stop_grace_period: 30m
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -43,16 +43,15 @@ services:
     volumes:
       # Bind Volumes ------------------------------------------------------------------------------
       - /etc/localtime:/etc/localtime
-      - ./tomcat/conf/openmrs-runtime.properties:/usr/local/tomcat/openmrs-runtime.properties
+      - ./tomcat/conf/openmrs-runtime.properties:/openmrs-runtime.properties
       - ./tomcat/conf/setenv.sh:/usr/local/tomcat/bin/setenv.sh
       - ./tomcat/data/webapps:/usr/local/tomcat/webapps
       - ./tomcat/data/OpenMRS:/usr/local/tomcat/.OpenMRS
-      # Docker managed volumes ---------------------------------------------------------------------
-      - refappTCLogs:/usr/local/tomcat/logs
+      - ./tomcat/logs:/usr/local/tomcat/logs
     healthcheck:
       test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
       interval: 2s
-      timeout: 30s 
+      timeout: 30s
       retries: 15
 # Network Definition ------------------------------------------------------------------------------
 networks:
@@ -60,12 +59,7 @@ networks:
     driver: bridge
 # Volume definition -------------------------------------------------------------------------------
 volumes:
-  refappDbData:
+  refappDb:
+    name: refappDb
     labels:
-      - data.refapp-db.description: "openMRS Database Volume"
-  refappDbLogs:
-    labels:
-      - logs.refapp-db.description: "openMRS Database Logs"
-  refappTCLogs:
-      - logs.refapp-tomcat.description: "openMRS Tomcat Logs"
-
+      data.refapp-db.description: "openMRS Database Volume"
