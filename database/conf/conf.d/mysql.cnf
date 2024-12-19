@@ -31,7 +31,7 @@ tmp_table_size=256M
 max_heap_table_size=256M
 
 #--------- Other Configuration ---------
-max_allowed_packet=4294967296
+max_allowed_packet=1073741824
 performance_schema=OFF
 skip_name_resolve
 
@@ -56,3 +56,4 @@ default-character-set=utf8
 #--------- embedded settings ------------------
 [embedded]
 datadir=/var/lib/mysql
+
