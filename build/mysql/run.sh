@@ -3,66 +3,67 @@ set -ex
 
 # Verifica e cria diretório de dados se não existir
 if [ ! -d "/run/mysqld" ]; then
-    mkdir -p /run/mysqld
+  mkdir -p /run/mysqld
 fi
 
-if [ -d "$MYSQL_DATA_DIRECTORY" ]; then
-    echo 'MySQL data directory exists'
-    if [ -f "$MYSQL_DATA_DIRECTORY/README.md" ]; then
-      rm -f $MYSQL_DATA_DIRECTORY/README.md
-    fi
-else
-    echo 'MySQL data directory does not exist'
-    echo "Creating MySQL data directory: $MYSQL_DATA_DIRECTORY"
-    mkdir -p "$MYSQL_DATA_DIRECTORY"
+if [ ! -d "$MYSQL_DATA_DIRECTORY" ]; then
+  echo 'MySQL data directory does not exist'
+  echo "Creating MySQL data directory: $MYSQL_DATA_DIRECTORY"
+  mkdir -p "$MYSQL_DATA_DIRECTORY"
 fi
+
+if [ ! -d "$MYSQL_LOG_DIRECTORY" ]; then
+  echo 'MySQL log directory does not exist'
+  echo "Creating MySQL log directory: $MYSQL_LOG_DIRECTORY"
+  mkdir -p "$MYSQL_LOG_DIRECTORY"
+fi
+
+chown -R mysql:mysql $MYSQL_DATA_DIRECTORY
+chown -R mysql:mysql $MYSQL_LOG_DIRECTORY
 
 if [ -d "$MYSQL_DATA_DIRECTORY/mysql" ]; then
-    echo 'Data directory already initialized'
-    echo 'Starting server'
-    exec /usr/sbin/mysqld --user=mysql --console --datadir="$MYSQL_DATA_DIRECTORY" 
+  echo 'Data directory already initialized'
+  echo 'Starting server'
+  exec /usr/sbin/mysqld --user=mysql --console --datadir="$MYSQL_DATA_DIRECTORY" 
 else
-    echo 'Initializing database'
-    mysqld --initialize --user=root --datadir="$MYSQL_DATA_DIRECTORY" > /var/log/mysql/mysql_startup_log.txt 2>&1
-    echo 'Database initialized'
+  echo 'Initializing database'
+  mysqld --initialize --user=root --datadir="$MYSQL_DATA_DIRECTORY" 
+  echo 'Database initialized'
 
-    if grep -q 'A temporary password is generated for root@localhost:' /var/log/mysql/mysql_startup_log.txt; then
-        temp_password=$(grep 'A temporary password is generated for root@localhost:' /var/log/mysql/mysql_startup_log.txt | awk '{print $NF}')
-    else
-        echo 'Temporary password not found in MySQL startup log'
-    fi
-    
-    # Inicia o servidor MySQL
-    echo 'Starting server'
-    /usr/sbin/mysqld --user=mysql --datadir="$MYSQL_DATA_DIRECTORY" &
+  if grep -q 'A temporary password is generated for root@localhost:' "$MYSQL_LOG_DIRECTORY"/mysql_error.log; then
+    temp_password=$(grep 'A temporary password is generated for root@localhost:' "$MYSQL_LOG_DIRECTORY"/mysql_error.log | awk '{print $NF}')
+  else
+    echo 'Temporary password not found in MySQL startup log'
+  fi
+  
+  # Inicia o servidor MySQL
+  echo 'Starting server'
+  /usr/sbin/mysqld --user=mysql --datadir="$MYSQL_DATA_DIRECTORY" &
 
-    # Espera até que o MySQL esteja pronto
-    sleep 5
+  # Espera até que o MySQL esteja pronto
+  sleep 5
 
-    mysql -hlocalhost -uroot -p"$temp_password" --connect-expired-password <<EOF
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'; 
-    FLUSH PRIVILEGES;
+  mysql -hlocalhost -uroot -p"$temp_password" --connect-expired-password <<EOF
+  ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'; 
+  FLUSH PRIVILEGES;
 EOF
 
-    # Executa outros comandos SQL necessários
-    mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
-    USE mysql;
-    CREATE USER 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
-    CREATE USER '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
-    CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
-    GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
-    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-    GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'localhost' WITH GRANT OPTION;
-    GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'%' WITH GRANT OPTION;
-    CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;
-    GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' WITH GRANT OPTION;
-    GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'localhost' WITH GRANT OPTION;
-    FLUSH PRIVILEGES;
+  # Executa outros comandos SQL necessários
+  mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
+  USE mysql;
+  CREATE USER 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
+  CREATE USER '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
+  CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+  GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+  GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+  GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'localhost' WITH GRANT OPTION;
+  GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_USER'@'%' WITH GRANT OPTION;
+  CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;
+  GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' WITH GRANT OPTION;
+  GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'localhost' WITH GRANT OPTION;
+  FLUSH PRIVILEGES;
 EOF
 fi
-
-# Armazena o valor original de sql_mode
-original_sql_mode=$(mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" -se "SELECT @@sql_mode")
 
 # Aumenta o innodb_lock_wait_timeout antes da restauração
 mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
@@ -71,24 +72,23 @@ EOF
 
 # Importa os dados, se disponíveis
 if [ -f "/scripts/openmrs.sql" ]; then
-    echo "Importando dados para o banco de dados $MYSQL_DATABASE"
-    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /scripts/openmrs.sql
+  echo "Importando dados para o banco de dados $MYSQL_DATABASE"
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /scripts/openmrs.sql
 
-    # Executa esses alter tables para resolver problemas identificados durante a migração da plataforma 2.3.3 para 2.6.1
-    mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
-    USE \`$MYSQL_DATABASE\`;
-    START TRANSACTION;
-    ALTER TABLE location MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE patient_state MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE patient_identifier MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE orders MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE reporting_report_design_resource MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE users MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE concept_reference_source MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE concept_name MODIFY date_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-    SET GLOBAL innodb_lock_wait_timeout = 60;
-    SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';
-    COMMIT;
+  # Executa esses alter tables para resolver problemas identificados durante a migração da plataforma 2.3.3 para 2.6.1
+  mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
+  USE \`$MYSQL_DATABASE\`;
+  START TRANSACTION;
+  ALTER TABLE location MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE patient_state MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE patient_identifier MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE orders MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE reporting_report_design_resource MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE users MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE concept_reference_source MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  ALTER TABLE concept_name MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
+  SET GLOBAL innodb_lock_wait_timeout = 60;
+  COMMIT;
 EOF
 fi
 
@@ -158,9 +158,3 @@ for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   batch=("${tables_array[@]:i:BATCH_SIZE}")
   run_rebuild_indexes_batch "${batch[@]}"
 done
-
-echo "Atualizando sql_mode para o valor original"
-# Restaura o valor original de sql_mode
-mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
-SET GLOBAL sql_mode = '$original_sql_mode';
-EOF

@@ -9,10 +9,18 @@ tomcat/data/OpenMRS/owa/
 tomcat/data/OpenMRS/REPORT_RESULTS
 tomcat/data/OpenMRS/person_images
 tomcat/data/OpenMRS/openmrs.log
-tomcat/data/logs/
+tomcat/logs/*.log
+tomcat/logs/*.txt
 
 # Ignore the provided dump file
 build/mysql/openmrs.sql
+
+# Ignore sensitive data
+.env
+
+# Ignore database files
+database/data/
+database/logs/
 
 # Editors
 .vscode/*
