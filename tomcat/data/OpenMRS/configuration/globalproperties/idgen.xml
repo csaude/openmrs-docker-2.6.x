@@ -1,0 +1,9 @@
+<config>
+    <globalProperties>
+        <globalProperty>
+            <property>idgen.prefixLocationAttributeType</property>
+            <value>Health Facility Code</value>
+        </globalProperty>
+    </globalProperties>
+</config>
+  

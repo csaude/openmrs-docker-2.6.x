@@ -1,0 +1,5 @@
+uuid,Name,"Identifier type","Base character set","First identifier base",Prefix,"Max length"
+3d588067-790b-45af-8128-a6c1ffb52883,"Generator for NID (SERVICO TARV)",e2b966d0-1d5f-11e0-b929-000c29ad1d07,0123456789,00001,provider:csaudecore.idgen.TarvNidPrefixProvider,21
+99408167-97eb-47bb-966b-92324b0e4b7c,"Generator for NID PREP",bce7c891-27e9-42ec-abb0-aec3a641175e,0123456789,00001,provider:csaudecore.idgen.PrepNidPrefixProvider,21
+e930ed89-506b-41eb-8161-36c571edb363,"Generator for NID (CCR)",e2b97b70-1d5f-11e0-b929-000c29ad1d07,0123456789,00001,provider:csaudecore.idgen.CcrNidPrefixProvider,21
+af113b3f-8afc-4c8b-a4a4-65db53072072,"Generator for NIT (SECTOR DE TB)",e2b97e40-1d5f-11e0-b929-000c29ad1d07,0123456789,00001,provider:csaudecore.idgen.TbNidPrefixProvider,21

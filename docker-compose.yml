@@ -1,48 +1,65 @@
-version: "3.2"
+name: refapp
 services:
-     refapp-db:
-         build:
-             context: ./mysql
-         container_name: refapp-db
-         ports:
-             - "3320:3306"
-         networks:
-             - network
-         volumes:
-             - datadb:/var/lib/mysql
-             
-     refapp-tomcat:
-         build:
-             context: ./tomcat
-         container_name: refapp-tomcat
-         ports:
-             - "8080:8080"
-         networks:
-             - network
-         depends_on:
-             - "refapp-db"
-         environment:
-             DISA_ENVIRONMENT:
-             DISA_API_USERNAME:
-             DISA_API_PASSWORD:
-         volumes:
-           - type: bind
-             source: ./data/webapps
-             target: /usr/local/tomcat/webapps
-           - type: bind
-             source: ./data/OpenMRS
-             target: /usr/local/tomcat/.OpenMRS
-           - type: bind
-             source: ./data/logs
-             target: /usr/local/tomcat/logs
-         healthcheck:
-            test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
-            interval: 2s
-            timeout: 30s
-            retries: 15
+  refapp-db:
+    image: hub.csaude.org.mz/sesp/mysql:8.4.2
+    container_name: refapp-db
+    stop_grace_period: 15m
+    restart: unless-stopped
+    ports:
+      - "3320:3306"
+    networks:
+      - network
+    environment:
+      # -- BOF REMOVE AFTER DATABASE CREATION
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+     # -- EOF REMOVE AFTER DATABASE CREATION
+      - MYSQL_DATA_DIRECTORY=/var/lib/mysql/data
+      - MYSQL_LOG_DIRECTORY=/var/lib/mysql/log
+    volumes:
+      # Bind Volumes ------------------------------------------
+      - /etc/localtime:/etc/localtime
+      - ./database/conf:/etc/mysql
+      - ./database/scripts:/scripts
+      # Docker managed volumes ---------------------------------------------------------------------
+      - refappDb:/var/lib/mysql
+  refapp-tomcat:
+    image: hub.csaude.org.mz/sesp/tomcat:9.0.97
+    container_name: refapp-tomcat
+    stop_grace_period: 30m
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - network
+    depends_on:
+      - "refapp-db"
+    environment:
+      - DISA_ENVIRONMENT=${DISA_ENVIRONMENT:-production}
+      - DISA_API_USERNAME=${DISA_API_USERNAME}
+      - DISA_API_PASSWORD=${DISA_API_PASSWORD}
+    volumes:
+      # Bind Volumes ------------------------------------------------------------------------------
+      - /etc/localtime:/etc/localtime
+      - ./tomcat/conf/openmrs-runtime.properties:/openmrs-runtime.properties:ro
+      - ./tomcat/conf/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./tomcat/data/webapps:/usr/local/tomcat/webapps
+      - ./tomcat/data/OpenMRS:/usr/local/tomcat/.OpenMRS
+      - ./tomcat/logs:/usr/local/tomcat/logs
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
+      interval: 2s
+      timeout: 30s
+      retries: 15
+# Network Definition ------------------------------------------------------------------------------
 networks:
   network:
     driver: bridge
-
+# Volume definition -------------------------------------------------------------------------------
 volumes:
-  datadb:
+  refappDb:
+    name: refappDb
+    labels:
+      data.refapp-db.description: "openMRS Database Volume"

@@ -52,6 +52,9 @@ else
         fi
 	
 	$SETUP_STOCK_SCRIPTS_DIR/pull_dbsync_deployment_project_from_git.sh "$SETUP_STOCK_STUFF_DIR" 2>&1 | tee -a $LOG_FILE
+
+	chmod +x $SETUP_SCRIPTS_DIR/*.sh
+
 	$SETUP_SCRIPTS_DIR/performe_initial_installation.sh
 fi
 

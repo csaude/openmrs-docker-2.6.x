@@ -1,0 +1,291 @@
+{
+  "name": "FICHA CLINICA O3",
+  "description": "Ficha Clinica  - MasterCard",
+  "version": "2.0",
+  "published": true,
+  "retired": false,
+  "processor": "EncounterFormProcessor",
+  "encounter":"S.TARV: ADULTO SEGUIMENTO",
+  "referencedForms": [],
+  "pages": [
+    {
+      "label": "Ficha Clínica",
+      "sections": [
+        {
+          "label": "População Chave",
+          "isExpanded": false,
+          "questions": [
+            {
+              "id": "keyPop",
+              "label": " ",
+              "type": "obs",
+              "inlineMultiCheckbox": true,
+              "questionOptions": {
+                "concept": "c7c0b430-bbc1-4042-a365-ad78a13aef56",
+                "rendering": "checkbox",
+                "answers": [
+                  {
+                    "concept": "e1daa454-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "HSH"
+                  },
+                  {
+                    "concept": "5bdb7ec1-908a-11e6-a98e-000c29db4475",
+                    "label": "PID"
+                  },
+                  {
+                    "concept": "58021703-908a-11e6-a98e-000c29db4475",
+                    "label": "REC"
+                  },
+                  {
+                    "concept": "e1df1296-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "MTS"
+                  },
+                  {
+                    "concept": "2b68aa87-2fc2-4c72-8c53-55c3fa265e6d",
+                    "label": "TG"
+                  },
+                  {
+                    "concept": "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                    "label": "Outro"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "otherKeyPop",
+              "label": " ",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "rendering": "text"
+              }
+            }
+          ]
+        },
+        {
+          "label": "População Vulnerárel",
+          "isExpanded": false,
+          "questions": [
+            {
+              "id": "populacaoVulneravel",
+              "label": " ",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "814a2be7-43db-49e5-a870-2ca1fedacb69",
+                "rendering": "select",
+                "answers": [
+                  {
+                    "concept": "e1e051a6-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "e1df3a8c-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "e1df209c-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "e1df2204-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "95f393be-3853-4d63-8640-4a505f9ea81b"
+                  },
+                  {
+                    "concept": "2ccb7192-7321-4156-b25a-f656e065dcbc"
+                  },
+                  {
+                    "concept": "e1e06ac4-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "cbb0baba-688d-4c7b-afb1-7d5be5d9a084"
+                  },
+                  {
+                    "concept": "e1d8dffc-1d5f-11e0-b929-000c29ad1d07"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "label": "Planeamento Familiar",
+          "isExpanded": false,
+          "questions": [
+            {
+              "id": "familyPlanning",
+              "label": " ",
+              "type": "obs",
+              "inlineMultiCheckbox": true,
+              "questionOptions": {
+                "concept": "e1d1a6d8-1d5f-11e0-b929-000c29ad1d07",
+                "rendering": "checkbox",
+                "answers": [
+                  {
+                    "concept": "e1d85294-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Não"
+                  },
+                  {
+                    "concept": "e1cff2ac-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Preservativo (PRESS)"
+                  },
+                  {
+                    "concept": "e1d5c786-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Contraceptivo Oral (PIL)"
+                  },
+                  {
+                    "concept": "e1e492ca-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Injectável (INJ)"
+                  },
+                  {
+                    "concept": "b69a31ae-ef74-4daa-b7fe-5a153948a2cd",
+                    "label": "Implante (IMP)"
+                  },
+                  {
+                    "concept": "e1e485fa-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Dispositivo Intra-uterino (DIU)"
+                  },
+                  {
+                    "concept": "e1e486f4-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Laqueação das Trompas (LT)"
+                  },
+                  {
+                    "concept": "0b9a8904-3c82-4b9a-9f15-50a2509cacf9",
+                    "label": "Vasectomia (VAS)"
+                  },
+                  {
+                    "concept": "908967c6-57be-4fa8-859c-51ad614e4307",
+                    "label": "Método Amenorreia Lactacional (MAL)"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "label": "Estádio OMS",
+          "isExpanded": false,
+          "questions": [
+            {
+              "id": "whoStaging",
+              "label": " ",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "e1e53c02-1d5f-11e0-b929-000c29ad1d07",
+                "rendering": "select",
+                "answers": [
+                  {
+                    "concept": "e1d9055e-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "e1d9066c-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "e1d9077a-1d5f-11e0-b929-000c29ad1d07"
+                  },
+                  {
+                    "concept": "e1d90888-1d5f-11e0-b929-000c29ad1d07"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "label": "Avaliação Nutricional",
+          "isExpanded": false,
+          "questions": [
+            {
+              "id": "nutritionalIndicator",
+              "label": "Indicador",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "4b4280d6-976d-4b0d-90b3-e28adb431f61",
+                "rendering": "select",
+                "answers": [
+                  {
+                    "concept": "98d34752-3034-4d22-81d5-2ab0c646406e",
+                    "label": "IMC/IDADE"
+                  },
+                  {
+                    "concept": "d33778f5-9bc2-4e04-aa5a-0af6002c540a",
+                    "label": "P/E"
+                  },
+                  {
+                    "concept": "e1da52ba-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "IMC"
+                  },
+                  {
+                    "concept": "1343AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                    "label": "PB"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "nutritionalDegree",
+              "label": "Grau",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "0b1a2c8c-55d2-42a8-a3d6-62828f52d49a",
+                "rendering": "select",
+                "answers": [
+                  {
+                    "concept": "e1cf1422-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "DAM"
+                  },
+                  {
+                    "concept": "aa84f34d-11f7-4466-b784-0fdda716ace2",
+                    "label": "Ligeira"
+                  },
+                  {
+                    "concept": "e1dec764-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "DAG"
+                  },
+                  {
+                    "concept": "e1d85b22-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Normal"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "nutritionalSupport",
+              "label": "Apoio",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "e1e205f0-1d5f-11e0-b929-000c29ad1d07",
+                "rendering": "select",
+                "answers": [
+                  {
+                    "concept": "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                    "label": "Não"
+                  },
+                  {
+                    "concept": "014b76fb-c7ee-404c-b913-9795a108015e",
+                    "label": "ATPU"
+                  },
+                  {
+                    "concept": "e1e204ec-1d5f-11e0-b929-000c29ad1d07",
+                    "label": "Soja"
+                  },
+                  {
+                    "concept": "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                    "label": "Educação"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "nutritionalAmount",
+              "label": "Quantidade",
+              "type": "obs",
+              "questionOptions": {
+                "concept": "28eaa9c2-2519-4937-bd3c-ba52b2b49f2f",
+                "rendering": "number"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

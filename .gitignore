@@ -1,18 +1,26 @@
 
 # Don't commit deployed openmrs
-data/webapps/openmrs/
-data/OpenMRS/.openmrs-lib-cache
-data/OpenMRS/activemq-data
-data/OpenMRS/chartsearch
-data/OpenMRS/lucene
-data/OpenMRS/owa/
-data/OpenMRS/REPORT_RESULTS
-data/OpenMRS/person_images
-data/OpenMRS/openmrs.log
-data/logs/
+tomcat/data/webapps/openmrs/
+tomcat/data/OpenMRS/.openmrs-lib-cache
+tomcat/data/OpenMRS/activemq-data
+tomcat/data/OpenMRS/chartsearch
+tomcat/data/OpenMRS/lucene
+tomcat/data/OpenMRS/owa/
+tomcat/data/OpenMRS/REPORT_RESULTS
+tomcat/data/OpenMRS/person_images
+tomcat/data/OpenMRS/openmrs.log
+tomcat/logs/*.log
+tomcat/logs/*.txt
 
 # Ignore the provided dump file
-mysql/openmrs.sql
+build/mysql/openmrs.sql
+
+# Ignore sensitive data
+.env
+
+# Ignore database files
+database/data/
+database/logs/
 
 # Editors
 .vscode/*
