@@ -15,6 +15,9 @@ tomcat/logs/*.txt
 # Ignore the provided dump file
 build/mysql/openmrs.sql
 
+# Ignore sensitive data
+.env
+
 # Ignore database files
 database/data/
 database/logs/
