@@ -3,7 +3,7 @@ services:
   refapp-db:
     image: hub.csaude.org.mz/sesp/mysql:8.4.2
     container_name: refapp-db
-    stop_grace_period: 2h
+    stop_grace_period: 15m
     restart: unless-stopped
     ports:
       - "3320:3306"
@@ -11,10 +11,10 @@ services:
       - network
     environment:
       # -- BOF REMOVE AFTER DATABASE CREATION
-      - MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE: ${MYSQL_DATABASE}
-      - MYSQL_USER: ${MYSQL_USER}
-      - MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
      # -- EOF REMOVE AFTER DATABASE CREATION
       - MYSQL_DATA_DIRECTORY=/var/lib/mysql/data
       - MYSQL_LOG_DIRECTORY=/var/lib/mysql/log
@@ -37,9 +37,9 @@ services:
     depends_on:
       - "refapp-db"
     environment:
-      - DISA_ENVIRONMENT: ${DISA_ENVIRONMENT:-production}
-      - DISA_API_USERNAME: ${DISA_API_USERNAME}
-      - DISA_API_PASSWORD: ${DISA_API_PASSWORD}
+      - DISA_ENVIRONMENT=${DISA_ENVIRONMENT:-production}
+      - DISA_API_USERNAME=${DISA_API_USERNAME}
+      - DISA_API_PASSWORD=${DISA_API_PASSWORD}
     volumes:
       # Bind Volumes ------------------------------------------------------------------------------
       - /etc/localtime:/etc/localtime
