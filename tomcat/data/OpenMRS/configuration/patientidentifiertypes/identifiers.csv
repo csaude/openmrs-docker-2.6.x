@@ -1,0 +1,2 @@
+Uuid,Void/Retire,Name,Description,Required,Format,Format description,Validator,"Location behavior","Uniqueness behavior"
+7e0d2cd6-afba-4a81-886e-82d0c397f037,false,NUIT,"Número Unico de Identificacao Tributaria",false,\\d{9},Nove dígitos,,,,

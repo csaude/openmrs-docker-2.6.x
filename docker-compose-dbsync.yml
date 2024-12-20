@@ -6,7 +6,7 @@ services:
         container_name: dbsync-remote
         network_mode: host
         environment:
-            - curr_git_branch=main
+            - curr_git_branch=develop
         env_file:
             - ./dbsync/eip.env
         working_dir: /home/eip
