@@ -96,16 +96,35 @@ fi
 echo "Atualizando estatísticas das tabelas em lotes"
 BATCH_SIZE=10
 
-# Função para executar ANALYZE TABLE em um lote de tabelas
-run_analyze_batch() {
-  local batch=("$@")
-  local query=""
+# Função para executar comandos SQL com tratamento de erros
+execute_sql_batch() {
+  local query="$1"
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "$query"
 
-  for table in "${batch[@]}"; do
-    query+="ANALYZE TABLE \`${table}\`; "
+  # Verifica o código de retorno do comando
+  if [ $? -ne 0 ]; then
+    echo "Erro ao executar: $query"
+    # Registrar o erro em um arquivo de log
+    echo "$(date) - Erro ao executar: $query" >> /scripts/error_log.txt
+    # Continuar mesmo em caso de erro
+    return 1
+  fi
+  return 0
+}
+
+# Função para processar um lote de tabelas e aplicar o comando fornecido
+process_batch() {
+  local batch=("$@")
+  local query="$1"
+  local action="$2"
+  shift 2
+  local tables=("$@")
+  
+  for table in "${tables[@]}"; do
+    query+=" $action TABLE \`${table}\`; "
   done
 
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE \`${MYSQL_DATABASE}\`; ${query}"
+  execute_sql_batch "USE \`${MYSQL_DATABASE}\`; ${query}"
 }
 
 # Obtenha a lista de tabelas
@@ -114,47 +133,32 @@ tables=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -N -e "SELECT table_name FROM inf
 # Converta a lista de tabelas em um array
 tables_array=($tables)
 
-# Processar as tabelas em lotes
+# Processar as tabelas em lotes para ANALYZE
 total_tables=${#tables_array[@]}
 for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   batch=("${tables_array[@]:i:BATCH_SIZE}")
-  run_analyze_batch "${batch[@]}"
+  echo "Executando ANALYZE para o lote $((i / BATCH_SIZE + 1))..."
+  process_batch "" "ANALYZE" "${batch[@]}"
 done
 
 # Otimiza tabelas em lotes
 echo "Otimização das tabelas em lotes"
-run_optimize_batch() {
-  local batch=("$@")
-  local query=""
-
-  for table in "${batch[@]}"; do
-    query+="OPTIMIZE TABLE \`${table}\`; "
-  done
-
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE \`${MYSQL_DATABASE}\`; ${query}"
-}
-
-# Processar as tabelas em lotes para otimização
 for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   batch=("${tables_array[@]:i:BATCH_SIZE}")
-  run_optimize_batch "${batch[@]}"
+  echo "Executando OPTIMIZE para o lote $((i / BATCH_SIZE + 1))..."
+  process_batch "" "OPTIMIZE" "${batch[@]}"
 done
 
-# Rebuild indexes em lotes
+# Rebuild índices em lotes
 echo "Reconstruindo índices em lotes"
-run_rebuild_indexes_batch() {
-  local batch=("$@")
-  local query=""
-
-  for table in "${batch[@]}"; do
-    query+="ALTER TABLE \`${table}\` ENGINE = InnoDB; "
-  done
-
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE \`${MYSQL_DATABASE}\`; ${query}"
-}
-
-# Processar as tabelas em lotes para reconstrução de índices
 for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   batch=("${tables_array[@]:i:BATCH_SIZE}")
-  run_rebuild_indexes_batch "${batch[@]}"
+  echo "Executando ALTER TABLE para o lote $((i / BATCH_SIZE + 1))..."
+  process_batch "" "ALTER" "${batch[@]}"
 done
+
+# Mensagem final ao usuário
+echo "======================================================"
+echo "O processo de restauração da base de dados e otimizações das tabelas foi concluído com sucesso."
+echo "Pressione Control + C para encerrar e siga os procedimentos indicados no SOP."
+echo "======================================================"
