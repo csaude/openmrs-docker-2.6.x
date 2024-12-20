@@ -6,7 +6,7 @@ Project can be used to either run an 2.6.9 instance or upgrade an 2.3.x instance
 
 1. Edit and customize .env.sample file (using your editor of choice nano, vim, ...) save.
 2. Copy the updated .env.sample to .env.
-       cp .env.sample .env 
+       **cp .env.sample .env** 
 
 3. Place the SQL dump of the database which has to be named _openmrs.sql_ in _**/database/scripts**_ directory.
 4. While in the project's directory run the command `docker compose up -d`.
