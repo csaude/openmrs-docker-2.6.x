@@ -190,3 +190,9 @@ for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   echo "Executando ALTER TABLE para o lote $((i / BATCH_SIZE + 1))..."
   process_batch "" "ALTER" "${batch[@]}"
 done
+
+# Mensagem final indicando sucesso
+echo "====================================="
+echo "Todas as operações foram concluídas com sucesso!"
+echo "Estatísticas atualizadas, tabelas otimizadas e índices reconstruídos."
+echo "====================================="
