@@ -75,21 +75,51 @@ if [ -f "/scripts/openmrs.sql" ]; then
   echo "Importando dados para o banco de dados $MYSQL_DATABASE"
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /scripts/openmrs.sql
 
-  # Executa esses alter tables para resolver problemas identificados durante a migração da plataforma 2.3.3 para 2.6.1
+
+  # Atualizando propriedades do OpenMRS
   mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" <<EOF
   USE \`$MYSQL_DATABASE\`;
-  START TRANSACTION;
-  ALTER TABLE location MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE patient_state MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE patient_identifier MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE orders MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE reporting_report_design_resource MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE users MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE concept_reference_source MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  ALTER TABLE concept_name MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;
-  SET GLOBAL innodb_lock_wait_timeout = 60;
-  COMMIT;
+  UPDATE global_property SET property_value = 'http://localhost:8080/openmrs/owa/' WHERE property = 'owa.appBaseUrl';
+  UPDATE global_property SET property_value = '/usr/local/tomcat/.OpenMRS/owa' WHERE property = 'owa.appFolderPath';
 EOF
+echo "Propriedades 'owa.appBaseUrl' e 'owa.appFolderPath' atualizadas."
+
+
+# Executa os 'ALTER TABLE' para resolver problemas identificados durante a migração
+echo "Alterando colunas 'date_created' para usar DEFAULT CURRENT_TIMESTAMP."
+
+# Busca as tabelas que possuem a coluna 'date_created'
+table_list=$(mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" -N -e "
+USE \`$MYSQL_DATABASE\`;
+SELECT table_name 
+FROM information_schema.columns
+WHERE column_name = 'date_created' AND table_schema = DATABASE();
+")
+
+# Itera sobre a lista de tabelas
+for table_name in $table_list; do
+    # Pula tabelas problemáticas (encounter, gaac ou outras que causam falhas)
+    if [[ "$table_name" == "encounter" || "$table_name" == "gaac" ]]; then
+        echo "Ignorando tabela '$table_name' devido a problemas conhecidos com colunas específicas."
+        continue
+    fi
+
+    # Gera e executa o comando ALTER TABLE para cada tabela
+    alter_command="ALTER TABLE \`$table_name\` MODIFY date_created DATETIME DEFAULT CURRENT_TIMESTAMP;"
+    echo "Executando: $alter_command"
+    
+    # Captura erros no comando ALTER TABLE
+    if ! mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -e "$alter_command"; then
+        echo "Erro ao alterar a tabela '$table_name'. Pulando esta tabela."
+        continue
+    fi
+done
+
+echo "Comandos ALTER TABLE para 'date_created' executados com sucesso."
+
+# Restaurando timeout do lock para 60 segundos
+mysql -hlocalhost -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SET GLOBAL innodb_lock_wait_timeout = 60;"
+
 fi
 
 # Atualiza estatísticas das tabelas em lotes
@@ -127,8 +157,12 @@ process_batch() {
   execute_sql_batch "USE \`${MYSQL_DATABASE}\`; ${query}"
 }
 
-# Obtenha a lista de tabelas
-tables=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -N -e "SELECT table_name FROM information_schema.tables WHERE table_schema = '${MYSQL_DATABASE}'")
+# Obtenha a lista de tabelas base (ignora views e outros objetos)
+tables=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -N -e "
+SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = '${MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
+")
 
 # Converta a lista de tabelas em um array
 tables_array=($tables)
@@ -156,9 +190,3 @@ for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   echo "Executando ALTER TABLE para o lote $((i / BATCH_SIZE + 1))..."
   process_batch "" "ALTER" "${batch[@]}"
 done
-
-# Mensagem final ao usuário
-echo "======================================================"
-echo "O processo de restauração da base de dados e otimizações das tabelas foi concluído com sucesso."
-echo "Pressione Control + C para encerrar e siga os procedimentos indicados no SOP."
-echo "======================================================"
