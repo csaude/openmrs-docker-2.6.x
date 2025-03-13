@@ -43,7 +43,7 @@ services:
     volumes:
       # Bind Volumes ------------------------------------------------------------------------------
       - /etc/localtime:/etc/localtime
-      - ./tomcat/conf/openmrs-runtime.properties:/openmrs-runtime.properties:ro
+      - ./tomcat/conf/openmrs-runtime.properties:/usr/local/tomcat/openmrs-runtime.properties:ro
       - ./tomcat/conf/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
       - ./tomcat/data/webapps:/usr/local/tomcat/webapps
       - ./tomcat/data/OpenMRS:/usr/local/tomcat/.OpenMRS
