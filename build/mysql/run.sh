@@ -38,7 +38,7 @@ else
   
   # Inicia o servidor MySQL
   echo 'Starting server'
-  /usr/sbin/mysqld --user=mysql --datadir="$MYSQL_DATA_DIRECTORY" &
+  /usr/sbin/mysqld --user=mysql --datadir="$MYSQL_DATA_DIRECTORY" --innodb-buffer-pool-size=12G  &
 
   # Espera até que o MySQL esteja pronto
   sleep 5
@@ -84,6 +84,12 @@ if [ -f "/scripts/openmrs.sql" ]; then
 EOF
 echo "Propriedades 'owa.appBaseUrl' e 'owa.appFolderPath' atualizadas."
 
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SET GLOBAL max_allowed_packet=1073741824;" 
+
+echo "Iniciando a criação de índices..." 
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /openmrs_indexes.sql
+
+echo "Criação de índices concluída. Continuando com otimizações..." 
 
 # Executa os 'ALTER TABLE' para resolver problemas identificados durante a migração
 echo "Alterando colunas 'date_created' para usar DEFAULT CURRENT_TIMESTAMP."
