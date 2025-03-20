@@ -15,7 +15,7 @@ Project can be used to either run an 2.6.11 instance or upgrade an 2.3.x instanc
 
 
 
-# Docker Compose Configuration for OpenMRS 2.6.9 Deployment and dbsync
+# Docker Compose Configuration for OpenMRS 2.6.11 Deployment and dbsync
 1. Place the SQL dump of the database which has to be named _openmrs.sql_ in _**/database/scripts**_ directory.
 2. Make sure you follow the instruction in this guide to set dbsync properties
    
