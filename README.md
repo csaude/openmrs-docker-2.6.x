@@ -1,6 +1,6 @@
-# Docker Compose Configuration for OpenMRS 2.6.9 Deployment
+# Docker Compose Configuration for OpenMRS 2.6.11 Deployment
 -
-Project can be used to either run an 2.6.9 instance or upgrade an 2.3.x instance (it uses the OpenMRS platform 2.6.9 war file). In order to launch/run, one is required to provide an sql dump of desired OpenMRS instance. When first run, the openmrs database will be created and then populated with the data from the provided sql dump. The subsequent run however, will skip this step.
+Project can be used to either run an 2.6.11 instance or upgrade an 2.3.x instance (it uses the OpenMRS platform 2.6.11 war file). In order to launch/run, one is required to provide an sql dump of desired OpenMRS instance. When first run, the openmrs database will be created and then populated with the data from the provided sql dump. The subsequent run however, will skip this step.
 
 ## Steps to run
 
