@@ -38,7 +38,7 @@ else
   
   # Inicia o servidor MySQL
   echo 'Starting server'
-  /usr/sbin/mysqld --user=mysql --datadir="$MYSQL_DATA_DIRECTORY" --innodb-buffer-pool-size=12G  &
+  /usr/sbin/mysqld --user=mysql --datadir="$MYSQL_DATA_DIRECTORY" &
 
   # Espera até que o MySQL esteja pronto
   sleep 5
@@ -83,13 +83,6 @@ if [ -f "/scripts/openmrs.sql" ]; then
   UPDATE global_property SET property_value = '/usr/local/tomcat/.OpenMRS/owa' WHERE property = 'owa.appFolderPath';
 EOF
 echo "Propriedades 'owa.appBaseUrl' e 'owa.appFolderPath' atualizadas."
-
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SET GLOBAL max_allowed_packet=1073741824;" 
-
-echo "Iniciando a criação de índices..." 
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < /openmrs_indexes.sql
-
-echo "Criação de índices concluída. Continuando com otimizações..." 
 
 # Executa os 'ALTER TABLE' para resolver problemas identificados durante a migração
 echo "Alterando colunas 'date_created' para usar DEFAULT CURRENT_TIMESTAMP."
@@ -142,7 +135,7 @@ execute_sql_batch() {
     echo "Erro ao executar: $query"
     # Registrar o erro em um arquivo de log
     echo "$(date) - Erro ao executar: $query" >> /scripts/error_log.txt
-    # Continuar mesmo em caso de erro
+    # Continuar mesmo em caso de errogit 
     return 1
   fi
   return 0
@@ -189,16 +182,9 @@ for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
   process_batch "" "OPTIMIZE" "${batch[@]}"
 done
 
-# Rebuild índices em lotes
-echo "Reconstruindo índices em lotes"
-for (( i=0; i<total_tables; i+=BATCH_SIZE )); do
-  batch=("${tables_array[@]:i:BATCH_SIZE}")
-  echo "Executando ALTER TABLE para o lote $((i / BATCH_SIZE + 1))..."
-  process_batch "" "ALTER" "${batch[@]}"
-done
-
 # Mensagem final indicando sucesso
 echo "====================================="
 echo "Todas as operações foram concluídas com sucesso!"
-echo "Estatísticas atualizadas, tabelas otimizadas e índices reconstruídos."
+echo "Base de dados \`${MYSQL_DATABASE}\` restaurada, estatísticas atualizadas e tabelas otimizadas."
+echo "Pressione 'Ctrl + C' e, de seguida, execute a criação de novos índices fazendo 'source openmrs_indexes.sql;' na DB \`${MYSQL_DATABASE}\`  container - refapp-db"
 echo "====================================="
